@@ -1,0 +1,16 @@
+{
+  "name": "blockchain",
+  "version": "1.0.0",
+  "description": "Udacity blockchain project 3",
+  "main": "simpleChain.js",
+  "scripts": {
+    "test": "node simpleChain.js"
+  },
+  "author": "Yunlei",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "*",
+    "express": "*",
+    "level": "*"
+  }
+}
