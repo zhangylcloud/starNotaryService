@@ -1,4 +1,9 @@
+//TODO list, schema validation, to make sure only one star is send in the request
+
+
+
 const Blockchain = require('../blockchain/simpleChain');
+const bitcoinMessage = require('bitcoinjs-message');
 const TimeoutRequestsWindowTime = 5*60*1000;
 
 /**
@@ -54,10 +59,9 @@ class StarRegistrationController {
     }
 
     requestValidationReg(){
-        this.app.post("/requestValidation", async (req, res) => {
+        this.app.post("/requestValidation", (req, res) => {
             //-----Check this
             let address = req.body.address;
-            console.log("-----currentTime is " + currentTime);
             //Check if this address is already in the mempool
             if(this.memPool[address]){
                 let memPoolObj = this.memPool[address];
@@ -100,10 +104,83 @@ class StarRegistrationController {
     }
 
     validateReg(){
+        this.app.post("/message-signature/validate", (req, res) => {
+            //-----Check this
+            let address = req.body.address;
+            let signature = req.body.signature;
+            //Check if this address is already in the mempool
+            if(!this.memPool[address]){
+                console.log("the wallet address is not in mempool or has timed out, please requestValidation");
+                res.status(400).send("the wallet address not in mempool or has timed out, please requestValidation");
+                return;
+            }
+            let memPoolObj = this.memPool[address];
+            let requestTimeStamp = memPoolObj.requestTime;
+            let message = address + ":" + requestTimeStamp + ":starRegistry";
+            let verifyResult = bitcoinMessage.verify(message, address, signature);
+            if(!verifyResult){
+                console.log("Identity verification failed! Returning");
+                res.status(400).send("Identity verification failed!");
+                return;
+            }
+
+            let currentTime = new Date().getTime().toString().slice(0,-3);
+            let timeElapse = currentTime - memPoolObj.requestTime;
+            let timeLeft = TimeoutRequestsWindowTime / 1000 - timeElapse;
+            memPoolObj.timeLeft = timeLeft;
+
+            res.status(200).json({
+                "address" : address,
+                "requestTimeStamp" : requestTimeStamp,
+                "message" : message,
+                "validationWindow" : memPoolObj.timeLeft,
+                "messageSignature" : "valid"
+            });
+            memPoolObj.walletValidated = true;
+            return;
+        });
 
     }
 
     registerStarReg(){
+        this.app.post("/block", async (req, res) => {
+            //-----Check this
+            let starBlock = req.body.block;
+            let address = starBlock.address;
+            //Check if this address is already in the mempool
+            if(!this.memPool[address]){
+                console.log("the wallet address is not in mempool or has timed out, please requestValidation");
+                res.status(400).send("the wallet address not in mempool or has timed out, please requestValidation");
+                return;
+            }
+
+            let star = starBlock.star;
+            let story = star.story;
+            let storyBuffer = Buffer.from(story, "utf8");
+            let hexEncodedStory = storybuffer.toString("hex");
+            let body = {
+                "address" : address,
+                "star" : {
+                    "ra" : star["ra"],
+                    "dec" : star["dec"],
+                    "mag" : star["mag"],
+                    "cen" : star["cen"],
+                    "story" : hexEncodedStory
+                }
+            }
+            try{
+                console.log("Adding block to chain");
+                let newBlock = await this.blockchain.addBlockFromObj(body);
+                newBlock.body.star.storyDecoded = hex2ascii(newBlock.body.star.story);
+                res.status(200).json(newBlock);
+            }
+            catch(err){
+                console.log("Error occurs while adding block with message");
+                console.log(body);
+                res.status(400).send("Error occurs while adding block with message");
+            }
+            return;
+        });
 
     }
 

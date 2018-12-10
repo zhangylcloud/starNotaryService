@@ -26,9 +26,10 @@ module.exports = class Blockchain{
   }  
   
   // Add new block from a string
-  async addBlockFromMsg(msg){
-    let newBlock = new Block(msg);
-    await this.addBlock(newBlock);
+  async addBlockFromObj(obj){
+    let newBlock = new Block(obj);
+    newBlock = await this.addBlock(newBlock);
+    return newBlock;
   }
 
   // Add new block
@@ -64,7 +65,7 @@ module.exports = class Blockchain{
     // Adding block object to chain
     await level.put(newBlock.height, JSON.stringify(newBlock));
     console.log("New block added");
-    return
+    return newBlock;
   }
 
   // Get block height

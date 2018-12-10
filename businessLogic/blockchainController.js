@@ -60,7 +60,7 @@ class BlockController {
             }
             try{
                 console.log("Adding block to chain");
-                await this.blockchain.addBlockFromMsg(body);
+                await this.blockchain.addBlockFromObj(body);
             }
             catch(err){
                 console.log("Error occurs while adding block with message");
