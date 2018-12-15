@@ -29,6 +29,42 @@ module.exports = class levelWrapper{
         });
     }
 
+    async getBlockByHash(hash){
+        let block = null;
+        return new Promise(function(resolve, reject){
+           self.db.createReadStream()
+           .on('data', function (data) {
+               if(data.hash === hash){
+                   block = data;
+               }
+           })
+           .on('error', function (err) {
+               reject(err)
+           })
+           .on('close', function () {
+               resolve(block);
+           });
+       }); 
+    }
+
+    async getBlockByAddress(address){
+        let blocks = [];
+        return new Promise(function(resolve, reject){
+            self.db.createReadStream()
+            .on('data', function (data) {
+                if(data.body.address === address){
+                    blocks.push(data);
+                }
+            })
+            .on('error', function (err) {
+                reject(err)
+            })
+            .on('close', function () {
+                resolve(blocks);
+            });
+        });
+    }
+
     async printDb(){
         console.log("Start printing");
         return new Promise(function(resolve, reject){

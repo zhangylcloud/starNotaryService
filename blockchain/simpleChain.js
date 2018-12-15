@@ -78,6 +78,14 @@ module.exports = class Blockchain{
     return await level.get(key);
   } 
 
+  async getBlockByHash(hash){
+    return await level.getBlockByHash(hash);
+  }
+  
+  async getBlockByAddress(address){
+    return await level.getBlockByAddress(address);
+  }
+
   // validate block
   async validateBlock(blockHeight){
     // get block object

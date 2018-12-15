@@ -185,11 +185,69 @@ class StarRegistrationController {
     }
 
     lookUpByHashReg(){
+        this.app.get("/stars/hash:hashValue", async (req, res) => {
+            // Add your code here
+            let blockHash = req.params.hashValue;
+            try{
+                console.log("Getting the block with hash" + blockHash);
+                let resultBlock = await this.blockchain.getBlockByHash(blockHash);
+                res.send(resultBlock);
+            }
+            catch(err){
+                if(err.type == 'NotFoundError'){
+                    console.log('Cannot find block with hash' + blockHash);
+                    res.status(400).send("Bad request, block not found");
+                }
+                else{
+                    console.log("Bad request");
+                    res.status(400).send("Bad request");
+                }
+            }
+        });
+    }
 
+    lookUpByWalletAddress(){
+        this.app.get("/stars/:address", async (req, res) => {
+            // Add your code here
+            let address = req.params.address;
+            try{
+                console.log("Getting the block with wallet address" + address);
+                let resultBlock = await this.blockchain.getBlockByAddress(address);
+                res.send(resultBlock);
+            }
+            catch(err){
+                if(err.type == 'NotFoundError'){
+                    console.log('Cannot find any block with wallet address' + address);
+                    res.status(400).send("Bad request, no block found");
+                }
+                else{
+                    console.log("Bad request");
+                    res.status(400).send("Bad request");
+                }
+            }
+        });
     }
 
     lookUpByHeightReg(){
-
+        this.app.get("/stars/:index", async (req, res) => {
+            // Add your code here
+            let blockIndex = req.params.index;
+            try{
+                console.log("Getting the block with index " + blockIndex);
+                let resultBlock = await this.blockchain.getBlock(blockIndex);
+                res.send(resultBlock);
+            }
+            catch(err){
+                if(err.type == 'NotFoundError'){
+                    console.log('Cannot find block with index ' + blockIndex);
+                    res.status(400).send("Bad request, block not found");
+                }
+                else{
+                    console.log("Bad request");
+                    res.status(400).send("Bad request");
+                }
+            }
+        });
     }
 
     /**
