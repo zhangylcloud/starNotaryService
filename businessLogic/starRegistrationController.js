@@ -39,9 +39,6 @@ class StarRegistrationController {
     async initialize() {
         this.blockchain = new Blockchain();
         await this.blockchain.initialize();
-        //this.initializeMockData();
-        //this.getBlockByIndex();
-        //this.postNewBlock();
         this.requestValidationReg();
         this.validateReg();
         this.registerStarReg();
@@ -169,7 +166,7 @@ class StarRegistrationController {
             try{
                 console.log("Adding block to chain");
                 let newBlock = await this.blockchain.addBlockFromObj(body);
-                newBlock.body.star.storyDecoded = hex2ascii(newBlock.body.star.story);
+                //newBlock.body.star.storyDecoded = hex2ascii(newBlock.body.star.story);
                 console.log("In controller 2, after adding new block and new block is ");
                 console.log(newBlock);
                 res.status(200).json(newBlock);
@@ -231,7 +228,7 @@ class StarRegistrationController {
     }
 
     lookUpByHeightReg(){
-        this.app.get("/stars/:height", async (req, res) => {
+        this.app.get("/block/:height", async (req, res) => {
             // Add your code here
             let blockIndex = req.params.height;
             try{
