@@ -4,7 +4,7 @@
 const chainDB = './chaindata';
 const level = require('level');
 const db = level(chainDB);
-const NotFoundError = require('../Errors/Errors').NotFoundError;
+const NotFoundError = require('../errors/Errors').NotFoundError;
 
 
 module.exports = class levelWrapper{

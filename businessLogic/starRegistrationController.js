@@ -1,5 +1,3 @@
-//TODO list, schema validation, to make sure only one star is send in the request
-
 const Blockchain = require('../blockchain/simpleChain');
 const bitcoinMessage = require('bitcoinjs-message');
 const hex2ascii = require('hex2ascii');
