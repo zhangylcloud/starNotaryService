@@ -5,7 +5,8 @@
 Express
 
 ## Endpoint
-1) GET:
+1. GET:
+
 Look up by hash:
 http://localhost:8000/stars/hash:[HASH]
 
@@ -16,7 +17,8 @@ Look up by block height:
 http://localhost:8000/block/[HEIGHT]
   
 
-2) POST:
+2. POST:
+
 Send ValidationRequest:
 http://localhost:8000/requestValidation
 with { "address":"19xaiMqayaNrn3x7AjV5cU4Mk5f5prRVpL" }
@@ -51,7 +53,7 @@ This sends a validation request using my public address
 This sends a validate request to verify the signature, you need to use your own bitcoin core to find your signature
 ```curl -d '{"address":"mnckZaQxZu3x7QuNkSG3zFQZYMFxzntmtX", "signature":"IOuW1k+fVvyvunG+ptVZdEaT5UfF2a3MFl9gMw/bL2NmH6ygWf+MTar2ux79xcTKUwzoZFyUQbdN6vcPRiG32QI="}' -H "Content-Type: application/json" -X POST http://localhost:8000/message-signature/validate```
 
-This register a star on blockchain. The json file with star info is in star1.json. please run from tests directory so star*.json can be read.
+This registers a star on blockchain. The json file with star info is in star1.json. please run from tests directory so star*.json can be read.
 ```curl -d @star1.json -H "Content-Type: application/json" -X POST http://localhost:8000/block```
 
 This will return a block with hash 71c84166f61a310d87430e617bfbd57f31f64b4be91c745f3bb2fc282d902100
@@ -64,9 +66,9 @@ This will return a block with at height 1
 ```curl -H "Content-Type: application/json" -X GET http://localhost:8000/block/1```
 
 ## How to install
-1) Clone the project from https://github.com/zhangylcloud/starNotaryService.git
-2) In project root directory run `npm install`
-3) Run `node index.js` 
+1. Clone the project from https://github.com/zhangylcloud/starNotaryService.git
+2. In project root directory run `npm install`
+3. Run `node index.js` 
 
 
 
