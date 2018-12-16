@@ -51,8 +51,8 @@ This sends a validation request using my public address
 This sends a validate request to verify the signature, you need to use your own bitcoin core to find your signature
 ```curl -d '{"address":"mnckZaQxZu3x7QuNkSG3zFQZYMFxzntmtX", "signature":"IOuW1k+fVvyvunG+ptVZdEaT5UfF2a3MFl9gMw/bL2NmH6ygWf+MTar2ux79xcTKUwzoZFyUQbdN6vcPRiG32QI="}' -H "Content-Type: application/json" -X POST http://localhost:8000/message-signature/validate```
 
-This register a star on blockchain. The json file with star info is in star.json
-```curl -d @star.json -H "Content-Type: application/json" -X POST http://localhost:8000/block```
+This register a star on blockchain. The json file with star info is in star1.json. please run from tests directory so star*.json can be read.
+```curl -d @star1.json -H "Content-Type: application/json" -X POST http://localhost:8000/block```
 
 This will return a block with hash 71c84166f61a310d87430e617bfbd57f31f64b4be91c745f3bb2fc282d902100
 ```curl -H "Content-Type: application/json" -X GET http://localhost:8000/stars/hash71c84166f61a310d87430e617bfbd57f31f64b4be91c745f3bb2fc282d902100```
