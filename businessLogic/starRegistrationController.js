@@ -1,9 +1,8 @@
 //TODO list, schema validation, to make sure only one star is send in the request
 
-
-
 const Blockchain = require('../blockchain/simpleChain');
 const bitcoinMessage = require('bitcoinjs-message');
+const hex2ascii = require('hex2ascii');
 const TimeoutRequestsWindowTime = 5*60*1000;
 
 /**
@@ -49,7 +48,7 @@ class StarRegistrationController {
         this.validateReg();
         this.registerStarReg();
         this.lookUpByHashReg();
-        this.lookUpByAddressReg();
+        this.lookUpByWalletAddressReg();
         this.lookUpByHeightReg();
     }
 
@@ -84,7 +83,7 @@ class StarRegistrationController {
             }
 
             let memPoolObj = {};
-            let currentTime = new Data().getTime().toString().slice(0, -3);
+            let currentTime = new Date().getTime().toString().slice(0, -3);
             memPoolObj.address = address;
             memPoolObj.walletValidated = false;
             memPoolObj.requestTime = currentTime;
@@ -120,7 +119,7 @@ class StarRegistrationController {
             let verifyResult = bitcoinMessage.verify(message, address, signature);
             if(!verifyResult){
                 console.log("Identity verification failed! Returning");
-                res.status(400).send("Identity verification failed!");
+                res.status(400).send("Identity verification failed! Returning");
                 return;
             }
 
@@ -130,11 +129,14 @@ class StarRegistrationController {
             memPoolObj.timeLeft = timeLeft;
 
             res.status(200).json({
-                "address" : address,
-                "requestTimeStamp" : requestTimeStamp,
-                "message" : message,
-                "validationWindow" : memPoolObj.timeLeft,
-                "messageSignature" : "valid"
+                "registerStar" : true,
+                "status" : {
+                    "address" : address,
+                    "requestTimeStamp" : requestTimeStamp,
+                    "message" : message,
+                    "validationWindow" : memPoolObj.timeLeft,
+                    "messageSignature" : true
+                }
             });
             memPoolObj.walletValidated = true;
             return;
@@ -144,9 +146,7 @@ class StarRegistrationController {
 
     registerStarReg(){
         this.app.post("/block", async (req, res) => {
-            //-----Check this
-            let starBlock = req.body.block;
-            let address = starBlock.address;
+            let address = req.body.address;
             //Check if this address is already in the mempool
             if(!this.memPool[address]){
                 console.log("the wallet address is not in mempool or has timed out, please requestValidation");
@@ -154,10 +154,10 @@ class StarRegistrationController {
                 return;
             }
 
-            let star = starBlock.star;
+            let star = req.body.star;
             let story = star.story;
             let storyBuffer = Buffer.from(story, "utf8");
-            let hexEncodedStory = storybuffer.toString("hex");
+            let hexEncodedStory = storyBuffer.toString("hex");
             let body = {
                 "address" : address,
                 "star" : {
@@ -172,6 +172,8 @@ class StarRegistrationController {
                 console.log("Adding block to chain");
                 let newBlock = await this.blockchain.addBlockFromObj(body);
                 newBlock.body.star.storyDecoded = hex2ascii(newBlock.body.star.story);
+                console.log("In controller 2, after adding new block and new block is ");
+                console.log(newBlock);
                 res.status(200).json(newBlock);
             }
             catch(err){
@@ -189,14 +191,14 @@ class StarRegistrationController {
             // Add your code here
             let blockHash = req.params.hashValue;
             try{
-                console.log("Getting the block with hash" + blockHash);
                 let resultBlock = await this.blockchain.getBlockByHash(blockHash);
+                resultBlock.body.star.storyDecoded = hex2ascii(resultBlock.body.star.story);
                 res.send(resultBlock);
             }
             catch(err){
                 if(err.type == 'NotFoundError'){
-                    console.log('Cannot find block with hash' + blockHash);
-                    res.status(400).send("Bad request, block not found");
+                    console.log('Cannot find block with hash: ' + blockHash);
+                    res.status(400).send("Cannot find block with hash: " + blockHash);
                 }
                 else{
                     console.log("Bad request");
@@ -206,19 +208,21 @@ class StarRegistrationController {
         });
     }
 
-    lookUpByWalletAddress(){
-        this.app.get("/stars/:address", async (req, res) => {
+    lookUpByWalletAddressReg(){
+        this.app.get("/stars/address:addr", async (req, res) => {
             // Add your code here
-            let address = req.params.address;
+            let address = req.params.addr;
             try{
-                console.log("Getting the block with wallet address" + address);
-                let resultBlock = await this.blockchain.getBlockByAddress(address);
-                res.send(resultBlock);
+                let resultBlocks = await this.blockchain.getBlockByAddress(address);
+                for(let blockIndex in resultBlocks){
+                    resultBlocks[blockIndex].body.star.storyDecoded = hex2ascii(resultBlocks[blockIndex].body.star.story);
+                }
+                res.send(resultBlocks);
             }
             catch(err){
                 if(err.type == 'NotFoundError'){
-                    console.log('Cannot find any block with wallet address' + address);
-                    res.status(400).send("Bad request, no block found");
+                    console.log('Cannot find any block with wallet address: ' + address);
+                    res.status(400).send('Cannot find any block with wallet address: ' + address);
                 }
                 else{
                     console.log("Bad request");
@@ -229,83 +233,24 @@ class StarRegistrationController {
     }
 
     lookUpByHeightReg(){
-        this.app.get("/stars/:index", async (req, res) => {
+        this.app.get("/stars/:height", async (req, res) => {
             // Add your code here
-            let blockIndex = req.params.index;
+            let blockIndex = req.params.height;
             try{
-                console.log("Getting the block with index " + blockIndex);
                 let resultBlock = await this.blockchain.getBlock(blockIndex);
+                resultBlock = JSON.parse(resultBlock);
+                resultBlock.body.star.storyDecoded = hex2ascii(resultBlock.body.star.story);
                 res.send(resultBlock);
             }
             catch(err){
                 if(err.type == 'NotFoundError'){
-                    console.log('Cannot find block with index ' + blockIndex);
-                    res.status(400).send("Bad request, block not found");
+                    console.log('Cannot find block with height: ' + blockIndex);
+                    res.status(400).send('Cannot find block with height: ' + blockIndex);
                 }
                 else{
                     console.log("Bad request");
                     res.status(400).send("Bad request");
                 }
-            }
-        });
-    }
-
-    /**
-     * Implement a GET Endpoint to retrieve a block by index, url: "/block/:index"
-     */
-    getBlockByIndex() {
-        this.app.get("/block/:index", async (req, res) => {
-            // Add your code here
-            let blockIndex = req.params.index;
-            try{
-                console.log("Getting the block with index " + blockIndex);
-                let resultBlock = await this.blockchain.getBlock(blockIndex);
-                res.send(resultBlock);
-            }
-            catch(err){
-                if(err.type == 'NotFoundError'){
-                    console.log('Cannot find block with index ' + blockIndex);
-                    res.status(400).send("Bad request, block not found");
-                }
-                else{
-                    console.log("Bad request");
-                    res.status(400).send("Bad request");
-                }
-            }
-        });
-    }
-
-    /**
-     * Implement a POST Endpoint to add a new Block, url: "/block"
-     */
-    postNewBlock() {
-        this.app.post("/block", async (req, res) => {
-            // Add your code here
-            let body = req.body.body;
-            //console.log(req);
-            if(!body){
-                console.log("Bad request, invalid/empty body message");
-                res.status(400).send("Bad request, invalid/empty body message");
-                return;
-            }
-            try{
-                console.log("Adding block to chain");
-                await this.blockchain.addBlockFromMsg(body);
-            }
-            catch(err){
-                console.log("Error occurs while adding block with message");
-                console.log(body);
-                res.status(400).send("Bad post request");
-            }
-            try{
-                console.log("Getting back the newly add block");
-                let curHeight = await this.blockchain.getBlockHeight();
-                let blockAdded = await this.blockchain.getBlock(curHeight);
-                res.status(201).send(blockAdded);
-            }
-            catch(err){
-                console.log("Block added, but cannot get it back");
-                res.status(400).send("Block added, but cannot get it back, something goes wrong");
             }
         });
     }
@@ -315,4 +260,4 @@ class StarRegistrationController {
  * Exporting the BlockController class
  * @param {*} app 
  */
-module.exports = (app) => { return new BlockController(app);}
+module.exports = (app) => { return new StarRegistrationController(app);}

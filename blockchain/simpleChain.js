@@ -59,8 +59,6 @@ module.exports = class Blockchain{
     newBlock.previousBlockHash = curBlock.hash;
     // Block hash with SHA256 using newBlock and converting to a string
     newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-    console.log("New block is ");
-    console.log(newBlock);
 
     // Adding block object to chain
     await level.put(newBlock.height, JSON.stringify(newBlock));

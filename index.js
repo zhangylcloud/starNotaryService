@@ -35,7 +35,7 @@ class BlockAPI {
      * Initialization of all the controllers
      */
     async initControllers() {
-        let blockchainController = require("./businessLogic/blockchainController")(this.app);
+        let blockchainController = require("./businessLogic/starRegistrationController")(this.app);
         await blockchainController.initialize();
     }
 

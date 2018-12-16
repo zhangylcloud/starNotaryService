@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "crypto-js": "*",
-    "express": "*",
-    "level": "*"
+    "express": "^4.16.4",
+    "level": "*",
+    "bitcoinjs-message": "*",
+    "hex2ascii": "*"
   }
 }

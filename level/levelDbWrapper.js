@@ -4,6 +4,7 @@
 const chainDB = './chaindata';
 const level = require('level');
 const db = level(chainDB);
+const NotFoundError = require('../Errors/Errors').NotFoundError;
 
 
 module.exports = class levelWrapper{
@@ -30,19 +31,25 @@ module.exports = class levelWrapper{
     }
 
     async getBlockByHash(hash){
-        let block = null;
+        let block = undefined;
         return new Promise(function(resolve, reject){
-           self.db.createReadStream()
+           db.createReadStream()
            .on('data', function (data) {
-               if(data.hash === hash){
-                   block = data;
+               data.value = JSON.parse(data.value);
+               if(data.value.hash === hash){
+                   block = data.value;
                }
            })
            .on('error', function (err) {
                reject(err)
            })
            .on('close', function () {
-               resolve(block);
+               if(block === undefined){
+                   reject(new NotFoundError("Can't find block with hash: " + hash));
+               }
+               else{
+                   resolve(block);
+               }
            });
        }); 
     }
@@ -50,17 +57,23 @@ module.exports = class levelWrapper{
     async getBlockByAddress(address){
         let blocks = [];
         return new Promise(function(resolve, reject){
-            self.db.createReadStream()
+            db.createReadStream()
             .on('data', function (data) {
-                if(data.body.address === address){
-                    blocks.push(data);
+                data.value = JSON.parse(data.value);
+                if(data.value.body.address === address){
+                    blocks.push(data.value);
                 }
             })
             .on('error', function (err) {
                 reject(err)
             })
             .on('close', function () {
-                resolve(blocks);
+                if(blocks.length === 0){
+                    reject(new NotFoundError("Can't find block with address: " + address));
+                }
+                else{
+                    resolve(blocks);
+                }
             });
         });
     }
