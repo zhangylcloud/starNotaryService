@@ -148,6 +148,12 @@ class StarRegistrationController {
                 res.status(400).send("the wallet address not in mempool or has timed out, please requestValidation");
                 return;
             }
+            //Check if the address is validated by bitcoin wallet
+            if(!this.memPool[address].walletValidated){
+                console.log("the wallet address is not validated with bitcoin wallet, please use /message-signature/validate endpoint to validate");
+                res.status(400).send("the wallet address is not validated with bitcoin wallet, please use /message-signature/validate endpoint to validate");
+                return;
+            }
 
             let star = req.body.star;
             let story = star.story;
@@ -170,6 +176,7 @@ class StarRegistrationController {
                 console.log("In controller 2, after adding new block and new block is ");
                 console.log(newBlock);
                 res.status(200).json(newBlock);
+                delete this.memPool[address];
             }
             catch(err){
                 console.log("Error occurs while adding block with message");
@@ -184,7 +191,7 @@ class StarRegistrationController {
     lookUpByHashReg(){
         this.app.get("/stars/hash:hashValue", async (req, res) => {
             // Add your code here
-            let blockHash = req.params.hashValue;
+            let blockHash = req.params.hashValue.slice(1);
             try{
                 let resultBlock = await this.blockchain.getBlockByHash(blockHash);
                 resultBlock.body.star.storyDecoded = hex2ascii(resultBlock.body.star.story);
@@ -206,7 +213,7 @@ class StarRegistrationController {
     lookUpByWalletAddressReg(){
         this.app.get("/stars/address:addr", async (req, res) => {
             // Add your code here
-            let address = req.params.addr;
+            let address = req.params.addr.slice(1);
             try{
                 let resultBlocks = await this.blockchain.getBlockByAddress(address);
                 for(let blockIndex in resultBlocks){

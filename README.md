@@ -57,10 +57,10 @@ This registers a star on blockchain. The json file with star info is in star1.js
 ```curl -d @star1.json -H "Content-Type: application/json" -X POST http://localhost:8000/block```
 
 This will return a block with hash 71c84166f61a310d87430e617bfbd57f31f64b4be91c745f3bb2fc282d902100
-```curl -H "Content-Type: application/json" -X GET http://localhost:8000/stars/hash71c84166f61a310d87430e617bfbd57f31f64b4be91c745f3bb2fc282d902100```
+```curl -H "Content-Type: application/json" -X GET http://localhost:8000/stars/hash:71c84166f61a310d87430e617bfbd57f31f64b4be91c745f3bb2fc282d902100```
 
 This will return one or many blocks, registered by address mnckZaQxZu3x7QuNkSG3zFQZYMFxzntmtX
-```curl -H "Content-Type: application/json" -X GET http://localhost:8000/stars/addressmnckZaQxZu3x7QuNkSG3zFQZYMFxzntmtX```
+```curl -H "Content-Type: application/json" -X GET http://localhost:8000/stars/address:mnckZaQxZu3x7QuNkSG3zFQZYMFxzntmtX```
 
 This will return a block with at height 1
 ```curl -H "Content-Type: application/json" -X GET http://localhost:8000/block/1```
